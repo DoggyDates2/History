@@ -1,0 +1,41 @@
+name: Extract Sheet History
+
+on:
+  # Manual trigger through GitHub website
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year to extract data from'
+        required: false
+        default: '2024'
+        type: string
+  
+  # Optional: Run automatically on a schedule
+  # Uncomment below to run weekly on Mondays at 5am UTC
+  # schedule:
+  #   - cron: '0 5 * * 1'
+
+jobs:
+  extract-history:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          pip install google-auth google-auth-oauthlib google-auth-httplib2
+          pip install google-api-python-client
+          pip install pytz
+      
+      - name: Extract Historical Data
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          EXTRACT_YEAR: ${{ github.event.inputs.year || '2024' }}
+        run: python extract_history.py
